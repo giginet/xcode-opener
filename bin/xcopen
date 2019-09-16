@@ -20,16 +20,19 @@ Commands:
 EOF
 }
 
-open() {
+open_xcode() {
   XCODE_PATH=$(mdfind "kMDItemCFBundleIdentifier == 'com.apple.dt.Xcode'" | head -n1)
   XCODE_PATH=${XCODE_PATH:-"/Applications/Xcode.app"}
 
   if [ -e "Package.swift" ]; then
     open -a $XCODE_PATH ./
+    exit 0
   elif [ -e "*.xcworkspace" ]; then
     open -a $XCODE_PATH *.xcworkspace
+    exit 0
   elif [ -e "*.xcodeproj" ]; then
     open -a $XCODE_PATH *.xcodeproj
+    exit 0
   else
     echo "Could not found any Xcode project"
     echo "The current directory must contain Package.swift, *.xcworkspace or *.xcodeproj"
@@ -42,7 +45,7 @@ subcommand=${subcommand:-"open"}
 
 case $subcommand in
   "open" )
-    open
+    open_xcode
     exit 0
     ;;
   "help" )
