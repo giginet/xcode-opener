@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+
+version() {
+    echo "xcode-opener 0.1.0 by giginet <giginet.net@gmail.com>"
+    echo "https://github.com/giginet/xcode-opener"
+}
+
+usage() {
+  version
+cat << EOF >&2
+Xcode Opener
+Open Xcode project by context
+
+Usage:
+    $(basename $0) [command] [<args>]
+Commands:
+    open                  Open Xcode projects by context
+    help                  Display usage
+    version               Display current script version
+EOF
+}
+
+open() {
+  XCODE_PATH=$(mdfind "kMDItemCFBundleIdentifier == 'com.apple.dt.Xcode'" | head -n1)
+  XCODE_PATH=${XCODE_PATH:-"/Applications/Xcode.app"}
+
+  if [ -e "Package.swift" ]; then
+    open -a $XCODE_PATH ./
+  elif [ -e "*.xcworkspace" ]; then
+    open -a $XCODE_PATH *.xcworkspace
+  elif [ -e "*.xcodeproj" ]; then
+    open -a $XCODE_PATH *.xcodeproj
+  else
+    echo "Could not found any Xcode project"
+    exit 1
+  fi
+}
+
+subcommand=$1
+subcommand=${subcommand:-"open"}
+
+case $subcommand in
+  "open" )
+    open
+    exit 0
+    ;;
+  "help" )
+    usage
+    exit 0
+    ;;
+  "version" )
+    version
+    exit 0
+    ;;
+  * )
+    echo "Unknown command $subcommand"
+esac
