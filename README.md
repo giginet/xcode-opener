@@ -13,3 +13,11 @@ $ xcopen
 $ xcopen help
 $ xcopen version
 ```
+
+## Installation
+
+### zplug
+
+```bash
+zplug "giginet/xcode-opener", lazy:true, use:'bin/xcopen', as:command
+```
