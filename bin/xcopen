@@ -32,6 +32,7 @@ open() {
     open -a $XCODE_PATH *.xcodeproj
   else
     echo "Could not found any Xcode project"
+    echo "The current directory must contain Package.swift, *.xcworkspace or *.xcodeproj"
     exit 1
   fi
 }
