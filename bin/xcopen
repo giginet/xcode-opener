@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 version() {
-    echo "xcode-opener 0.1.0 by giginet <giginet.net@gmail.com>"
+    echo "xcode-opener 0.2.0 by giginet <giginet.net@gmail.com>"
     echo "https://github.com/giginet/xcode-opener"
 }
 
@@ -20,17 +20,21 @@ Commands:
 EOF
 }
 
+_find() {
+  echo $(find . -maxdepth 1 -name "$1" -print -quit) | tail -n 1
+}
+
 open_xcode() {
   XCODE_PATH=$(mdfind "kMDItemCFBundleIdentifier == 'com.apple.dt.Xcode'" | head -n1)
-  XCODE_PATH=${XCODE_PATH:-"/Applications/Xcode.app"}
+  XCODE_PATH=${XCODE_PATH:-"/Applications/Xcode.app"} 
 
   if [ -e "Package.swift" ]; then
     open -a $XCODE_PATH ./
     exit 0
-  elif [ -e "*.xcworkspace" ]; then
+  elif [ -n "$(_find "*.xcworkspace")" ]; then
     open -a $XCODE_PATH *.xcworkspace
     exit 0
-  elif [ -e "*.xcodeproj" ]; then
+  elif [ -n "$(_find "*.xcodeproj")" ]; then
     open -a $XCODE_PATH *.xcodeproj
     exit 0
   else
