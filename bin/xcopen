@@ -24,22 +24,57 @@ _find() {
   echo $(find . -maxdepth 1 -name "$1" -print -quit) | tail -n 1
 }
 
+_parseXcodeVersion() {
+  PLISTBUDDY_PATH=/usr/libexec/PlistBuddy
+  XCODE_VERSION=$($PLISTBUDDY_PATH -c "print CFBundleShortVersionString" $1/Contents/version.plist)
+  echo $XCODE_VERSION
+}
+
+_allXcodeVersions() {
+  echo $(mdfind "kMDItemCFBundleIdentifier == 'com.apple.dt.Xcode'")
+}
+
+_findXcode() {
+  all_xcode_versions=$(_allXcodeVersions)
+  for xcode_path in $all_xcode_versions
+  do
+    version=$(_parseXcodeVersion $xcode_path)
+    if [ $version == $1 ]; then
+      echo $xcode_path
+      break
+    fi
+  done
+}
+
 open_xcode() {
-  XCODE_PATH=$(mdfind "kMDItemCFBundleIdentifier == 'com.apple.dt.Xcode'" | head -n1)
-  XCODE_PATH=${XCODE_PATH:-"/Applications/Xcode.app"} 
+  if [ "$1" == "-v" ]; then
+    version=$2
+  fi
+  if [ -n "$version" ]; then
+    xcode_path=$(_findXcode $version)
+    if [ -z $xcode_path ]; then
+      printf "\e[31mCould not found Xcode ${version}\e[m\n"
+    fi
+  else
+    all_xcode_versions=$(_allXcodeVersions)
+    xcode_path=$(echo $all_xcode_versions | awk '{ print $1 }')
+  fi
+  xcode_path=${xcode_path:-"/Applications/Xcode.app"} 
+  version=$(_parseXcodeVersion $xcode_path)
+
+  echo "Using Xcode ${version} on ${xcode_path}"
 
   if [ -e "Package.swift" ]; then
-    open -a $XCODE_PATH ./
+    open -a $xcode_path ./
     exit 0
   elif [ -n "$(_find "*.xcworkspace")" ]; then
-    open -a $XCODE_PATH *.xcworkspace
+    open -a $xcode_path *.xcworkspace
     exit 0
   elif [ -n "$(_find "*.xcodeproj")" ]; then
-    open -a $XCODE_PATH *.xcodeproj
+    open -a $xcode_path *.xcodeproj
     exit 0
   else
-    echo "Could not found any Xcode project"
-    echo "The current directory must contain Package.swift, *.xcworkspace or *.xcodeproj"
+    printf "\e[31mCould not found any Xcode projects. The current directory must contain Package.swift, *.xcworkspace or *.xcodeproj\e[m\n"
     exit 1
   fi
 }
@@ -48,6 +83,10 @@ subcommand=$1
 subcommand=${subcommand:-"open"}
 
 case $subcommand in
+  "-v" )
+    open_xcode -v $2
+    exit 0
+    ;;
   "open" )
     open_xcode
     exit 0
