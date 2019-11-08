@@ -93,7 +93,7 @@ list_xcode() {
     version=$(_parseXcodeVersion $path)
     versions="${versions} ${version}"
   done
-  echo $versions | sort | uniq | tr  ' ' '\n'
+  echo $versions | tr  ' ' '\n' | uniq | sort
 }
 
 subcommand=$1
