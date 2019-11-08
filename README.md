@@ -10,6 +10,8 @@ $ xcopen
 
 ```console
 $ xcopen
+$ xcopen -v 10.3
+$ xcopen list
 $ xcopen help
 $ xcopen version
 ```
