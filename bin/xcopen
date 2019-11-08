@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 version() {
-    echo "xcode-opener 0.2.0 by giginet <giginet.net@gmail.com>"
+    echo "xcode-opener 0.3.0 by giginet <giginet.net@gmail.com>"
     echo "https://github.com/giginet/xcode-opener"
 }
 
@@ -14,7 +14,8 @@ Open Xcode project by context
 Usage:
     $(basename $0) [command] [<args>]
 Commands:
-    open                  Open Xcode projects by context
+    open [-v version]     Open Xcode projects by context with specific Xcode version
+    list                  List all available Xcodes
     help                  Display usage
     version               Display current script version
 EOF
@@ -30,12 +31,12 @@ _parseXcodeVersion() {
   echo $XCODE_VERSION
 }
 
-_allXcodeVersions() {
+_allXcodePaths() {
   echo $(mdfind "kMDItemCFBundleIdentifier == 'com.apple.dt.Xcode'")
 }
 
 _findXcode() {
-  all_xcode_versions=$(_allXcodeVersions)
+  all_xcode_versions=$(_allXcodePaths)
   for xcode_path in $all_xcode_versions
   do
     version=$(_parseXcodeVersion $xcode_path)
@@ -47,7 +48,7 @@ _findXcode() {
 }
 
 open_xcode() {
-  if [ "$1" == "-v" ]; then
+  if [ $1 == "-v" ]; then
     version=$2
   fi
   if [ -n "$version" ]; then
@@ -56,10 +57,15 @@ open_xcode() {
       printf "\e[31mCould not found Xcode ${version}\e[m\n"
     fi
   else
-    all_xcode_versions=$(_allXcodeVersions)
+    all_xcode_versions=$(_allXcodePaths)
     xcode_path=$(echo $all_xcode_versions | awk '{ print $1 }')
   fi
   xcode_path=${xcode_path:-"/Applications/Xcode.app"} 
+  if [ -z $xcode_path ] || [ ! -e $xcode_path ]; then
+    printf "\e[31mCould not found any Xcode. Please install from Mac App Store.\e[m\n"
+    exit 1
+  fi
+
   version=$(_parseXcodeVersion $xcode_path)
 
   echo "Using Xcode ${version} on ${xcode_path}"
@@ -79,6 +85,17 @@ open_xcode() {
   fi
 }
 
+list_xcode() {
+  paths=$(_allXcodePaths)
+  versions=
+  for path in $paths
+  do
+    version=$(_parseXcodeVersion $path)
+    versions="${versions} ${version}"
+  done
+  echo $versions | sort | tr  ' ' '\n'
+}
+
 subcommand=$1
 subcommand=${subcommand:-"open"}
 
@@ -88,7 +105,11 @@ case $subcommand in
     exit 0
     ;;
   "open" )
-    open_xcode
+    open_xcode $2 $3
+    exit 0
+    ;;
+  "list" )
+    list_xcode
     exit 0
     ;;
   "help" )
