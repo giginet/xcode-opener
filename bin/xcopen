@@ -48,7 +48,7 @@ _findXcode() {
 }
 
 open_xcode() {
-  if [ $1 == "-v" ]; then
+  if [ -n "$1" ] && [ $1 == "-v" ]; then
     version=$2
   fi
   if [ -n "$version" ]; then
@@ -93,7 +93,7 @@ list_xcode() {
     version=$(_parseXcodeVersion $path)
     versions="${versions} ${version}"
   done
-  echo $versions | sort | tr  ' ' '\n'
+  echo $versions | sort | uniq | tr  ' ' '\n'
 }
 
 subcommand=$1
