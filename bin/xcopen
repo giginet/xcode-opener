@@ -57,8 +57,7 @@ open_xcode() {
       printf "\e[31mCould not found Xcode ${version}\e[m\n"
     fi
   else
-    all_xcode_versions=$(_allXcodePaths)
-    xcode_path=$(echo $all_xcode_versions | awk '{ print $1 }')
+    xcode_path=$(xcode-select -p | sed -e "s/\/Contents\/Developer//")
   fi
   xcode_path=${xcode_path:-"/Applications/Xcode.app"} 
   if [ -z $xcode_path ] || [ ! -e $xcode_path ]; then
