@@ -27,7 +27,7 @@ _find() {
 
 _parseXcodeVersion() {
   PLISTBUDDY_PATH=/usr/libexec/PlistBuddy
-  XCODE_VERSION=$($PLISTBUDDY_PATH -c "print CFBundleShortVersionString" $1/Contents/version.plist)
+  XCODE_VERSION=$($PLISTBUDDY_PATH -c "print CFBundleShortVersionString" "$1/Contents/version.plist")
   echo $XCODE_VERSION
 }
 
@@ -60,23 +60,23 @@ open_xcode() {
     xcode_path=$(xcode-select -p | sed -e "s/\/Contents\/Developer//")
   fi
   xcode_path=${xcode_path:-"/Applications/Xcode.app"} 
-  if [ -z $xcode_path ] || [ ! -e $xcode_path ]; then
+  if [ -z "$xcode_path" ] || [ ! -e "$xcode_path" ]; then
     printf "\e[31mCould not found any Xcode. Please install from Mac App Store.\e[m\n"
     exit 1
   fi
 
-  version=$(_parseXcodeVersion $xcode_path)
+  version=$(_parseXcodeVersion "$xcode_path")
 
   echo "Using Xcode ${version} on ${xcode_path}"
 
   if [ -e "Package.swift" ]; then
-    open -a $xcode_path ./
+    open -a "$xcode_path" ./
     exit 0
   elif [ -n "$(_find "*.xcworkspace")" ]; then
-    open -a $xcode_path *.xcworkspace
+    open -a "$xcode_path" *.xcworkspace
     exit 0
   elif [ -n "$(_find "*.xcodeproj")" ]; then
-    open -a $xcode_path *.xcodeproj
+    open -a "$xcode_path" *.xcodeproj
     exit 0
   else
     printf "\e[31mCould not found any Xcode projects. The current directory must contain Package.swift, *.xcworkspace or *.xcodeproj\e[m\n"
